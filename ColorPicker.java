@@ -1,5 +1,8 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -8,7 +11,25 @@ public class ColorPicker {
     public static void main(String[] args) {
         List<Rainbow> colorList = parseColors("colors.txt");
         Rainbow[] colorsArray = colorList.toArray(new Rainbow[0]);
-        new GUI(colorsArray);
+        GUI gui = new GUI(colorsArray);
+        
+        // Add this to ensure the file is written when the application closes
+        gui.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                writeColorsToFile(colorList, "colors.txt");
+            }
+        });
+    }
+
+    public static void writeColorsToFile(List<Rainbow> colors, String fileName) {
+    try (PrintWriter out = new PrintWriter(new FileWriter(fileName))) {
+        for (Rainbow color : colors) {
+            out.printf("%s %d %d %d%n", color.getColor(), color.getRGB()[0], color.getRGB()[1], color.getRGB()[2]);
+        }
+    } catch (IOException e) {
+        System.err.println("Error writing to file: " + e.getMessage());
+    }
     }
 
     private static List<Rainbow> parseColors(String fileName) {
